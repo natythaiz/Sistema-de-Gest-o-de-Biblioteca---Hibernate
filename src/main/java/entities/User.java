@@ -3,11 +3,24 @@ package entities;
 import java.util.Objects;
 
 import entities.enumeradores.TipoUser;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "users")
 public class User {
+	private static final long serialVersionUID = 1L;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String nome;
 	private String email;
+	@Enumerated(EnumType.STRING)
 	private TipoUser tipo;
 	private int limiteEmprestimo;
 	

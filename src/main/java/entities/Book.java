@@ -4,13 +4,29 @@ import java.util.Objects;
 
 import entities.enumeradores.Categoria;
 import entities.enumeradores.Status;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "books")
 public class Book {
+	private static final long serialVersionUID = 1L;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String titulo;
 	private String autor;
+	@Column(unique = true, nullable = false)
 	private int isbn;
+	@Enumerated(EnumType.STRING)
 	private Categoria categoria;
+	@Enumerated(EnumType.STRING)
 	private Status status;
 	
 	public Book() {}
@@ -20,7 +36,7 @@ public class Book {
 		this.autor = autor;
 		this.isbn = isbn;
 		this.categoria = categoria;
-		this.status = status.DISPONIVEL;
+		this.status = Status.DISPONIVEL;
 	}
 
 	public int getId() {
