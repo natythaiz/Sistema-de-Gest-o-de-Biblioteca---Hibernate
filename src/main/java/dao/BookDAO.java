@@ -67,7 +67,7 @@ public class BookDAO {
             tx = session.beginTransaction();
             session.delete(livro);
             tx.commit();
-            System.out.println("Book updated successfully.");
+            System.out.println("Book delted successfully.");
         } catch (Exception e) {
             if (tx != null) tx.rollback();
             e.printStackTrace();
