@@ -21,8 +21,6 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(entities.Loan.class);
 
             sessionFactory = configuration.buildSessionFactory();
-            System.out.println("Hibernate inicializado!");
-            System.out.println("Entidades registradas: " + sessionFactory.getMetamodel().getEntities().size());
         } catch (Throwable ex) {
             System.err.println("SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
