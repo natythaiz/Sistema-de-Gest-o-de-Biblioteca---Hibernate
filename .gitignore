@@ -24,3 +24,7 @@ hs_err_pid*
 replay_pid*
 
 db.properties
+/target/
+/.settings/
+.classpath
+.project
