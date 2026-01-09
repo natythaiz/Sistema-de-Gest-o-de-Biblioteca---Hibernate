@@ -13,11 +13,18 @@ public class Loan {
 	
 	public Loan() {}
 
-	public Loan(LocalDate dataEmprestimo, Book livro, User user) {
-		super();
-		this.dataEmprestimo = dataEmprestimo;
+	public Loan(Book livro, User user) {
+		this.dataEmprestimo = LocalDate.now();
 		this.livro = livro;
 		this.user = user;
+		this.dataDevolucaoPrevista = calcularDataDevolucao(user);
+	}
+
+	private LocalDate calcularDataDevolucao(User user2) {
+//		esta lógica está associada ao fato de que cada usuário já
+//		possui seu valor padrão de empréstimo 
+		int dias = user.getTipo().getPrazoEmprestimo(); 
+	    return LocalDate.now().plusDays(dias);
 	}
 
 	public int getId() {
