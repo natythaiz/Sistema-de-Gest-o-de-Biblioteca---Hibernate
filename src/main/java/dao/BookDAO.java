@@ -14,7 +14,7 @@ public class BookDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.save(livro);
+            session.persist(livro);
             tx.commit();
             System.out.println("Book saved successfully.");
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class BookDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.update(livro);
+            session.merge(livro);
             tx.commit();
             System.out.println("Book updated successfully.");
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class BookDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.delete(livro);
+            session.remove(livro);
             tx.commit();
             System.out.println("Book delted successfully.");
         } catch (Exception e) {

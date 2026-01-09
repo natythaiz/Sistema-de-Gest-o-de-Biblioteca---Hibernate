@@ -15,7 +15,7 @@ public class UserDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.save(user);
+            session.persist(user);
             tx.commit();
             System.out.println("User saved successfully.");
         } catch (Exception e) {
@@ -36,7 +36,7 @@ public class UserDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.update(user);
+            session.merge(user);
             tx.commit();
             System.out.println("User updated successfully.");
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class UserDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.delete(user);
+            session.remove(user);
             tx.commit();
             System.out.println("User deleted successfully.");
         } catch (Exception e) {
