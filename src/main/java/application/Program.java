@@ -1,15 +1,10 @@
 package application;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import dao.BookDAO;
 import dao.LoanDAO;
 import dao.UserDAO;
-import entities.Book;
 import entities.Loan;
-import entities.User;
-import entities.enumeradores.Status;
+import services.LoanService;
 
 public class Program {
 
@@ -18,7 +13,12 @@ public class Program {
 	    UserDAO userDao = new UserDAO();
 	    LoanDAO loanDao = new LoanDAO();
 
+	    LoanService loan = new LoanService();
+	    loan.registrarEmprestimo(userDao.findById(2), bookDao.findById(4));
 	    
+//	    Loan emprestimo = loanDao.findById(5);
+//	    loan.finalizarEmprestimo(emprestimo);
+//	    loan.atualizarEmprestimo(emprestimo);
 	}
 
 }

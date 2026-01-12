@@ -73,4 +73,12 @@ public class BookDAO {
             e.printStackTrace();
         }
     }
+	
+	public Book findByIsbn(int isbn) {
+	    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+	        return session.createQuery("from Book where isbn = :isbn", Book.class)
+	                      .setParameter("isbn", isbn)
+	                      .uniqueResult(); // Retorna o livro ou null se não achar
+	    }
+	}
 }

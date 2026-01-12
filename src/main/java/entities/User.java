@@ -26,12 +26,12 @@ public class User {
 	
 	public User() {}
 
-	public User(String nome, String email, TipoUser tipo, int limiteEmprestimo) {
+	public User(String nome, String email, TipoUser tipo) {
 		super();
 		this.nome = nome;
 		this.email = email;
 		this.tipo = tipo;
-		this.limiteEmprestimo = limiteEmprestimo;
+		this.limiteEmprestimo = tipo.getPrazoEmprestimo();
 	}
 
 	public int getId() {
