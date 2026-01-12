@@ -27,7 +27,7 @@ public class LoanService {
             return;
         }
         int qtd_Loan = loanDao.countLoanPerUser(usuario);
-        if(qtd_Loan >= 4) {
+        if(qtd_Loan >= 5) {
         	System.out.println("Limite excedido: O usuário já possui 5 empréstimos ativos!");
             return;
         }
