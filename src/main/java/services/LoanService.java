@@ -4,14 +4,17 @@ import java.time.LocalDate;
 
 import dao.BookDAO;
 import dao.LoanDAO;
+import dao.ReservationDAO;
 import entities.Book;
 import entities.Loan;
+import entities.Reservation;
 import entities.User;
 import entities.enumeradores.Status;
 
 public class LoanService {
 	private LoanDAO loanDao = new LoanDAO();
     private BookDAO bookDao = new BookDAO();
+    private ReservationDAO resDao = new ReservationDAO();
 
     public void registrarEmprestimo(User usuario, Book livro) {
         if (livro.getStatus() != Status.DISPONIVEL) {
@@ -44,10 +47,19 @@ public class LoanService {
     
     public void finalizarEmprestimo(Loan emprestimo) {
         emprestimo.setDataDevolucaoReal(LocalDate.now());
-        Book livro = emprestimo.getLivro();
-        livro.setStatus(Status.DISPONIVEL);
-        bookDao.updateBook(livro);
-
+        
+        Reservation proxima = resDao.findNextInLine(emprestimo.getLivro());
+        
+        if (proxima != null) {
+        	emprestimo.getLivro().setStatus(Status.RESERVADO); 
+            System.out.println("--- NOTIFICAÇÃO ---");
+            System.out.println("O livro ficou disponível, mas há uma RESERVA ativa!");
+            System.out.println("Favor avisar: " + proxima.getUser().getNome());
+        } else {
+        	emprestimo.getLivro().setStatus(Status.DISPONIVEL);
+        }
+        
+        bookDao.updateBook(emprestimo.getLivro());
         loanDao.updateLoan(emprestimo);
     }
     

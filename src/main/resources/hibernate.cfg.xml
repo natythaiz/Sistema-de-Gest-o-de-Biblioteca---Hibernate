@@ -17,5 +17,6 @@
         <mapping class="entities.Book"/>
         <mapping class="entities.User"/>
         <mapping class="entities.Loan"/>
+        <mapping class="entities.Reservation"/>
     </session-factory>
 </hibernate-configuration>
