@@ -1,12 +1,15 @@
 package dao;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import entities.Book;
 import entities.HibernateUtil;
 import entities.Loan;
+import entities.Reservation;
 import entities.User;
 
 public class LoanDAO {
@@ -75,7 +78,7 @@ public class LoanDAO {
         }
     }
 	
-//	count how many loans a user have
+//	count how many loans actives a user have
 	public int countLoanPerUser(User user) {
 		Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -91,6 +94,69 @@ public class LoanDAO {
             if (tx != null) tx.rollback();
             e.printStackTrace();
             return 0;
+        }
+	}
+	
+//	all loans per user
+	public List<Loan> allLoanPerUser(User user) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            String hql = "FROM Loan l WHERE l.user = :user ";
+            
+            List<Loan> list = session.createQuery(hql, Loan.class)
+                                .setParameter("user", user)
+                                .list();
+
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
+
+	public List<Loan> findLoanPerUser(User user) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            String hql = "FROM Loan l WHERE l.user = :user AND l.dataDevolucaoReal IS NULL";
+            
+            List<Loan> list = session.createQuery(hql, Loan.class)
+                                .setParameter("user", user)
+                                .list();
+
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
+
+	public List<Loan> findLoanLated() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            String hql = "FROM Loan l WHERE l.dataDevolucaoPrevista < l.dataDevolucaoReal OR (l.dataDevolucaoPrevista < :hoje AND l.dataDevolucaoReal IS NULL)";
+            List<Loan> list = session.createQuery(hql, Loan.class)
+            					.setParameter("hoje", LocalDate.now())
+                                .list();
+
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
 	}
 }

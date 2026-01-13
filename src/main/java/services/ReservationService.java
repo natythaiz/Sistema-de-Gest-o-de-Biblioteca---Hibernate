@@ -1,5 +1,7 @@
 package services;
 
+import java.util.List;
+
 import dao.BookDAO;
 import dao.ReservationDAO;
 import entities.Book;
@@ -61,4 +63,20 @@ public class ReservationService {
             throw new RuntimeException("Erro ao converter reserva em empréstimo: " + e.getMessage());
         }
     }
+
+	public void listReservationBook(int livroID) {
+		Book book = bookDao.findById(livroID);
+		if(book == null) {
+			System.out.println("Não foi encontrado um livro com este ID!");
+			return;
+		}
+		List<Reservation> result = resDao.usersReservatitionByBook(book);
+    	if(result.isEmpty() || result == null) {
+    		System.out.println("Lista de retorno vazia, não há empréstimos deste livro!");
+    	} else {
+    		for(Reservation r : result) {
+        		System.out.println(" #" + r.getId() +" - "+ r.getUser().getNome() + ". (" + r.getRequestDate()+ ")");
+        	}
+    	}
+	}
 }

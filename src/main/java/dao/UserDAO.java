@@ -5,9 +5,9 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import entities.Book;
 import entities.HibernateUtil;
 import entities.User;
+import entities.enumeradores.TipoUser;
 
 public class UserDAO {
 //	create
@@ -74,4 +74,29 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+
+	public List<User> findUserType(String upperCase) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+        	TipoUser tipoEnum = TipoUser.valueOf(upperCase);
+            String hql = "FROM User u WHERE u.tipo = :string";
+            
+            List<User> list = session.createQuery(hql, User.class)
+                                .setParameter("string", tipoEnum)
+                                .list();
+
+            return list;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Não existe este tipo de usuário!");
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
 }

@@ -88,4 +88,25 @@ public class ReservationDAO {
         }
         return null;
 	}
+
+	public List<Reservation> usersReservatitionByBook(Book book) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            String hql = "FROM Reservation r WHERE r.book = :book AND r.status = StatusReservation.PENDING";
+            
+            List<Reservation> list = session.createQuery(hql, Reservation.class)
+                                .setParameter("book", book)
+                                .list();
+
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
 }

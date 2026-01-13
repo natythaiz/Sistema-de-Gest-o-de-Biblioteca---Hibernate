@@ -7,6 +7,8 @@ import org.hibernate.Transaction;
 
 import entities.Book;
 import entities.HibernateUtil;
+import entities.Loan;
+import entities.enumeradores.Categoria;
 
 public class BookDAO {
 //	create
@@ -80,5 +82,52 @@ public class BookDAO {
 	                      .setParameter("isbn", isbn)
 	                      .uniqueResult(); // Retorna o livro ou null se não achar
 	    }
+	}
+
+	public List<Book> findBookString(String string) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            String hql = "FROM Book b WHERE b.titulo LIKE :string OR b.autor LIKE :string";
+            
+            String busca = "%" + string + "%";
+            List<Book> list = session.createQuery(hql, Book.class)
+                                .setParameter("string", busca)
+                                .list();
+
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
+
+	public List<Book> findBookCategory(String categoria) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+        	Categoria categoriaEnum = Categoria.valueOf(categoria);
+            String hql = "FROM Book b WHERE b.categoria = :string";
+            
+            List<Book> list = session.createQuery(hql, Book.class)
+                                .setParameter("string", categoriaEnum)
+                                .list();
+
+            return list;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Não existe esta categoria de livro!");
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
 	}
 }
