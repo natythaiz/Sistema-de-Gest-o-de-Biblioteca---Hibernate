@@ -48,11 +48,12 @@ O projeto segue uma arquitetura em camadas para facilitar a manutenção e escal
 **Como Executar o Projeto**
 - Clone o repositório:
 git clone https://github.com/seu-usuario/nome-do-repositorio.git
-Configure o Banco de Dados:
 
-- Crie um banco de dados MySQL chamado biblioteca_db.
+- Configure o Banco de Dados:
 
-- Atualize o arquivo src/main/resources/hibernate.cfg.xml com seu usuário e senha.
+  - Crie um banco de dados MySQL chamado biblioteca_db.
+
+  - Atualize o arquivo src/main/resources/hibernate.cfg.xml com seu usuário e senha.
 
 - Build e Run:
 
