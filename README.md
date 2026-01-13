@@ -47,7 +47,7 @@ O projeto segue uma arquitetura em camadas para facilitar a manutenção e escal
 
 **Como Executar o Projeto**
 - Clone o repositório:
-git clone [https://github.com/seu-usuario/nome-do-repositorio.git](https://github.com/natythaiz/Sistema-de-Gest-o-de-Biblioteca---Hibernate.git)
+git clone [https://github.com/natythaiz/Sistema-de-Gest-o-de-Biblioteca---Hibernate.git](https://github.com/natythaiz/Sistema-de-Gest-o-de-Biblioteca---Hibernate.git)
 
 - Configure o Banco de Dados:
 
