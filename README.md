@@ -57,9 +57,10 @@ git clone https://github.com/seu-usuario/nome-do-repositorio.git
 
 - Build e Run:
 
-Importe como projeto Maven na sua IDE (Eclipse/IntelliJ).
+- Importe como projeto Maven na sua IDE (Eclipse/IntelliJ).
 
-Execute a classe BibliotecaApp.java.
+- Execute a classe BibliotecaApp.java.
 
-**Funcionalidades: **
+**Funcionalidades:**
+
 <img width="475" height="389" alt="image" src="https://github.com/user-attachments/assets/ada3ecdc-21c9-4b3c-b546-b1465c2f9bd3" />
