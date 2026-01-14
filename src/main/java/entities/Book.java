@@ -11,6 +11,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,6 +30,9 @@ public class Book {
 	private Categoria categoria;
 	@Enumerated(EnumType.STRING)
 	private Status status;
+	@ManyToOne 
+    @JoinColumn(name = "saga_id") 
+	private Saga saga;
 	
 	public Book() {}
 	
@@ -37,6 +42,15 @@ public class Book {
 		this.isbn = isbn;
 		this.categoria = categoria;
 		this.status = Status.DISPONIVEL;
+	}
+
+	public Book(String titulo, String autor, int isbn, Categoria categoria, Saga saga) {
+		super();
+		this.titulo = titulo;
+		this.autor = autor;
+		this.isbn = isbn;
+		this.categoria = categoria;
+		this.saga = saga;
 	}
 
 	public int getId() {
@@ -87,6 +101,14 @@ public class Book {
 		this.status = status;
 	}
 
+	public Saga getSaga() {
+		return saga;
+	}
+
+	public void setSaga(Saga saga) {
+		this.saga = saga;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(isbn);
@@ -107,7 +129,6 @@ public class Book {
 	@Override
 	public String toString() {
 		return "Book [id=" + id + ", titulo=" + titulo + ", autor=" + autor + ", isbn=" + isbn + ", categoria="
-				+ categoria + ", status=" + status + "]";
+				+ categoria + ", status=" + status + ", saga=" + saga + "]";
 	}
-	
 }

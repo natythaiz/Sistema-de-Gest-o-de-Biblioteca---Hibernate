@@ -19,6 +19,7 @@ public class HibernateUtil {
         	configuration.addAnnotatedClass(entities.Book.class);
             configuration.addAnnotatedClass(entities.User.class);
             configuration.addAnnotatedClass(entities.Loan.class);
+            configuration.addAnnotatedClass(entities.Saga.class);
             configuration.addAnnotatedClass(entities.Reservation.class);
 
             sessionFactory = configuration.buildSessionFactory();
