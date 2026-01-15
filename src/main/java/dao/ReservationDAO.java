@@ -1,9 +1,12 @@
 package dao;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 
 import entities.Book;
 import entities.HibernateUtil;
@@ -103,6 +106,31 @@ public class ReservationDAO {
             e.printStackTrace();
             e.getStackTrace();
             return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
+
+	public List<Reservation> isReservation(Book obj) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		List<Reservation> resultados = new ArrayList<Reservation>();
+        try {
+        	String sql = "SELECT * FROM reservation r "
+        			+ "WHERE r.book_id = :id";
+	        
+	        NativeQuery<Reservation> query = session.createNativeQuery(sql, Reservation.class);
+	        
+	        query.setParameter("id", obj.getId());
+
+	        resultados = query.getResultList();
+
+            return resultados;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return Collections.emptyList();
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();

@@ -6,7 +6,6 @@ import dao.BookDAO;
 import dao.LoanDAO;
 import dao.ReservationDAO;
 import dao.UserDAO;
-import entities.Saga;
 import services.BookService;
 import services.LoanService;
 import services.ReservationService;
@@ -40,12 +39,12 @@ public class Program {
                 switch (opcao) {
                     case 1: sagaService.cadastrar(); break;
                     case 2: atualizarLivroSaga(); break;
-                    case 3: listarSaga(); break;
-                    case 4: listarLivroSaga(); break;
-                    case 5: listarLivroVariasSagas(); break;
-                    case 6: listarLivrosNomeSaga(); break;
-                    case 7: listarSagasContLivros(); break;
-                    case 8: dataEmprestimoPossivelSagas(); break;
+                    case 3: sagaService.listarSaga(); break;
+                    case 4: sagaService.listarLivroSaga(); break;
+                    case 5: sagaService.listarLivroVariasSagas(); break;
+                    case 6: bookService.listarLivrosNomeSaga(); break;
+                    case 7: sagaService.listarSagasContLivros(); break;
+                    case 8: sagaService.dataEmprestimoPossivelSagas(); break;
                     case 0: System.out.println("Saindo..."); break;
                     default: System.out.println("Opção inválida!");
                 }
@@ -60,7 +59,7 @@ public class Program {
         System.out.println("1 - Cadastrar Saga");
         System.out.println("2 - Inserir saga em livro persistido");
         System.out.println("3 - Listar sagas disponíveis");
-        System.out.println("4 - Listar livro de uma saga específica");
+        System.out.println("4 - Listar livros de uma saga específica");
         System.out.println("5 - Listar livros de várias sagas selecionadas (múltiplos parâmetros)");
         System.out.println("6 - Listar livros + nome nome da saga");
         System.out.println("7 - Listar sagas e quantos livros cada uma tem");
@@ -68,36 +67,6 @@ public class Program {
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
-
-	private static void dataEmprestimoPossivelSagas() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void listarSagasContLivros() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void listarLivrosNomeSaga() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void listarLivroVariasSagas() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void listarLivroSaga() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void listarSaga() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private static void atualizarLivroSaga() {
 		System.out.print("ID do livro para atualização: "); 

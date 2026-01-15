@@ -1,10 +1,12 @@
 package dao;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 
 import entities.Book;
 import entities.HibernateUtil;
@@ -149,6 +151,29 @@ public class LoanDAO {
                                 .list();
 
             return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            e.getStackTrace();
+            return null;
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+	}
+
+	public Loan findLoanBook(Book obj) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Loan loan = new Loan();
+        try {
+        	String sql = "SELECT * FROM loans l "
+        			   + "WHERE l.book_id = :id AND dataDevolucaoReal IS NULL";
+	        
+        	loan = session.createNativeQuery(sql, Loan.class)
+                    .setParameter("id", obj.getId())
+                    .uniqueResult(); 
+
+        	return loan;
         } catch (Exception e) {
             e.printStackTrace();
             e.getStackTrace();

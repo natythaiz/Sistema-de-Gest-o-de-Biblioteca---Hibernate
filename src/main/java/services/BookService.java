@@ -8,6 +8,7 @@ import dao.BookDAO;
 import entities.Book;
 import entities.HibernateUtil;
 import entities.Loan;
+import entities.SagaBook;
 import entities.User;
 
 public class BookService {
@@ -51,6 +52,13 @@ public class BookService {
 			for(Book obj: result) {
 				System.out.println("#" + obj.getId() + " - " + obj.getTitulo() + "/" + obj.getAutor());
 			}
+		}
+	}
+
+	public void listarLivrosNomeSaga() {
+		List<SagaBook> books = bookDao.getAllBooksSaga();
+		for(SagaBook obj: books) {
+			System.out.println("#" + obj.getId() + ": " + obj.getTitulo() + " (" + obj.getAutor() + ") - " + obj.getSagaNome());
 		}
 	}
 }
