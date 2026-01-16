@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import DTO.SagaDisponibilidade;
 import dao.BookDAO;
 import dao.LoanDAO;
 import dao.ReservationDAO;
@@ -17,7 +18,6 @@ import entities.Book;
 import entities.Loan;
 import entities.Reservation;
 import entities.Saga;
-import entities.SagaDisponibilidade;
 import entities.enumeradores.Status;
 
 public class SagaService {
@@ -80,10 +80,14 @@ public class SagaService {
      	   return;
         }
         List<Book> results = bookDao.findBookSaga(saga);
-        System.out.println("Livros da saga " + saga.getNome());
-        for (Book obj : results) {
-	        System.out.println(obj.getTitulo() + " (" + obj.getAutor() + ")");
-	    }
+        if(results.isEmpty()) {
+        	System.out.println("A saga '" + saga.getNome() + "' não possui livros cadastrados!");
+        } else {
+        	System.out.println("Livros da saga " + saga.getNome());
+            for (Book obj : results) {
+    	        System.out.println(obj.getTitulo() + " (" + obj.getAutor() + ")");
+    	    }
+        }
 	}
 	
 	public List<Long> pegarVariasSagas() {
@@ -112,9 +116,13 @@ public class SagaService {
 
 	public void listarLivroVariasSagas() {
 		List<Book> book = bookDao.findBooksManySagas(pegarVariasSagas());
-	    System.out.println("Resultado encontrado: ");
-	    for (Book obj : book) {
-	        System.out.println("ID: " + obj.getId() + ", Titulo: " + obj.getTitulo() + " - saga: " + obj.getSaga().getNome());
+	    if(book.isEmpty()) {
+	    	System.out.println("Não encontramos livros das sagas selecionadas!");
+	    } else {
+	    	System.out.println("Resultado encontrado: ");
+		    for (Book obj : book) {
+		        System.out.println("ID: " + obj.getId() + ", Titulo: " + obj.getTitulo() + " - saga: " + obj.getSaga().getNome());
+		    }
 	    }
 	}
 
@@ -134,10 +142,11 @@ public class SagaService {
 			System.out.println("Você selecionou uma saga que não existe!");
 		} else {
 			List<SagaDisponibilidade> valores = new ArrayList<>();
+			String str = "";
 			for(int i=0; i<sagas.size(); i++) {
 				List<Book> results = bookDao.findBookSaga(sagas.get(i));
 				if(results.isEmpty()) {
-					System.out.println("Não há livros cadastrados nesta saga! (" + sagas.get(i).getNome() + ")");
+					str += "Não há livros cadastrados nesta saga! (" + sagas.get(i).getNome() + ")";
 					continue;
 				}
 		        List<LocalDate> data = findDate(results);
@@ -145,6 +154,7 @@ public class SagaService {
 		        SagaDisponibilidade novo = new SagaDisponibilidade(sagas.get(i).getNome(), dataMaxima);
 		        valores.add(novo);
 			}
+			System.out.println(str);
 			for(SagaDisponibilidade obj: valores) {
 				System.out.println(obj);
 			}

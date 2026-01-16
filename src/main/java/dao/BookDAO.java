@@ -9,11 +9,11 @@ import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 
+import DTO.SagaBook;
 import entities.Book;
 import entities.HibernateUtil;
 import entities.Loan;
 import entities.Saga;
-import entities.SagaBook;
 import entities.enumeradores.Categoria;
 
 public class BookDAO {
@@ -200,7 +200,7 @@ public class BookDAO {
 	        session.beginTransaction();
 
 	        String sql = "SELECT b.id, b.titulo, b.autor, s.nome  FROM books b "
-	        		   + "RIGHT JOIN saga s ON b.saga_id = s.id;";
+	        		   + "INNER JOIN saga s ON b.saga_id = s.id;";
 	        List<Object[]> rows = session.createNativeQuery(sql, Object[].class).list();
 	        for (Object[] row : rows) {
 	        	int id = (int) row[0];

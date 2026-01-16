@@ -1,4 +1,4 @@
-package entities;
+package DTO;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,7 +36,9 @@ public class SagaDisponibilidade {
 		String str = "";
 		if(dataDisponivel.isBefore(LocalDate.now())) {
 			str = " (entrega atrasada)";
-		}
+		} else if(dataDisponivel.isEqual(LocalDate.now())) {
+			str = " (pronto para retirada)";
+		} 
 		return "Saga: " + nome + ", data em que todos os livros estarão disponíveis: " + dataDisponivel.format(fmt) + str;
 	}
 }

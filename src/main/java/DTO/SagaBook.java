@@ -1,4 +1,4 @@
-package entities;
+package DTO;
 
 public class SagaBook {
 	private int id;

@@ -104,7 +104,7 @@ public class SagaDAO {
 	        session.beginTransaction();
 
 	        String sql = "SELECT s.nome, COUNT(b.id) FROM books b "
-	        		+ "INNER JOIN saga s ON b.saga_id = s.id "
+	        		+ "RIGHT JOIN saga s ON b.saga_id = s.id "
 	        		+ "GROUP BY s.nome;";
 	        
 	        List<Object[]> rows = session.createNativeQuery(sql, Object[].class).list();
