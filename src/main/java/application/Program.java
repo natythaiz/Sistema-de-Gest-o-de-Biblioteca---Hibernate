@@ -2,28 +2,15 @@ package application;
 
 import java.util.Scanner;
 
-import dao.BookDAO;
-import dao.LoanDAO;
-import dao.ReservationDAO;
-import dao.UserDAO;
+import org.hibernate.Session;
+
+import entities.HibernateUtil;
 import services.BookService;
-import services.LoanService;
-import services.ReservationService;
 import services.SagaService;
-import services.UserService;
 
 public class Program {
 	private static BookService bookService = new BookService();
-    private static UserService userService = new UserService();
-    private static LoanService loanService = new LoanService();
-    private static ReservationService resService = new ReservationService();
     private static SagaService sagaService = new SagaService();
-    
-    // DAOs para buscas rápidas (usados aqui apenas para facilitar a busca por ID)
-    private static BookDAO bookDao = new BookDAO();
-    private static UserDAO userDao = new UserDAO();
-    private static LoanDAO loanDao = new LoanDAO();
-    private static ReservationDAO reservationDao = new ReservationDAO();
 	
     private static Scanner scanner = new Scanner(System.in);
     
@@ -37,20 +24,162 @@ public class Program {
 
             try {
                 switch (opcao) {
-                    case 1: sagaService.cadastrar(); break;
-                    case 2: atualizarLivroSaga(); break;
-                    case 3: sagaService.listarSaga(); break;
-                    case 4: sagaService.listarLivroSaga(); break;
-                    case 5: sagaService.listarLivroVariasSagas(); break;
-                    case 6: bookService.listarLivrosNomeSaga(); break;
-                    case 7: sagaService.listarSagasContLivros(); break;
-                    case 8: sagaService.dataEmprestimoPossivelSagas(); break;
+                    case 1: createSaga(); break;
+                    case 2: updateBookFromSaga(); break;
+                    case 3: listSaga(); break;
+                    case 4: listBookBySaga();; break;
+                    case 5: listBookFromSaga(); break;
+                    case 6: listBookAndSaga(); break;
+                    case 7: countBookFromSaga(); break;
+                    case 8: listDateAvaliableLoan(); break;
                     case 0: System.out.println("Saindo..."); break;
                     default: System.out.println("Opção inválida!");
                 }
             } catch (Exception e) {
                 System.err.println("ERRO: " + e.getMessage());
             }
+        }
+	}
+	
+	private static void createSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.create(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	
+	private static void countBookFromSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.countBookFromSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	
+	private static void listBookAndSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            bookService.listBookAndSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	
+	private static void listBookBySaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.listBookSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }	
+	}
+	
+	private static void listBookFromSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.listBookFromSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	private static void listSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.listSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	private static void listDateAvaliableLoan() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.listDateAvaliableLoan(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+	}
+	
+	private static void updateBookFromSaga() {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            sagaService.updateBookFromSaga(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
 	}
 	
@@ -67,11 +196,4 @@ public class Program {
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
-
-	private static void atualizarLivroSaga() {
-		System.out.print("ID do livro para atualização: "); 
-		int id = scanner.nextInt();
-		sagaService.atualizarLivroSaga(id);
-	}
-
 }

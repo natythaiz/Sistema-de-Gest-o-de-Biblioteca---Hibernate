@@ -3,6 +3,9 @@ package services;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Scanner;
+
+import org.hibernate.Session;
 
 import dao.BookDAO;
 import dao.LoanDAO;
@@ -19,8 +22,9 @@ public class LoanService {
 	private UserDAO userDao = new UserDAO();
     private BookDAO bookDao = new BookDAO();
     private ReservationDAO resDao = new ReservationDAO();
+    private Scanner scanner = new Scanner(System.in);
 
-    public void registrarEmprestimo(User usuario, Book livro) {
+    public void registrarEmprestimo(User usuario, Book livro, Session session) {
         if (livro.getStatus() != Status.DISPONIVEL) {
             System.out.println("Erro: Livro não está disponível para empréstimo.");
             return;
@@ -30,56 +34,58 @@ public class LoanService {
             System.out.println("Erro: Usuário ou Livro não identificado.");
             return;
         }
-        int qtd_Loan = loanDao.countLoanPerUser(usuario);
+        int qtd_Loan = loanDao.countLoanPerUser(usuario, session);
         if(qtd_Loan >= 5) {
         	System.out.println("Limite excedido: O usuário já possui 5 empréstimos ativos!");
             return;
         }
 
         // Se ok, cria o objeto de empréstimo
-        Loan emprestimo = new Loan();
-        emprestimo.setUser(usuario);
-        emprestimo.setLivro(livro);
-        emprestimo.setDataEmprestimo(LocalDate.now());
-        emprestimo.setDataDevolucaoPrevista(emprestimo.getDataEmprestimo().plusDays(usuario.getLimiteEmprestimo()));
+        Loan loan = new Loan();
+        loan.setUser(usuario);
+        loan.setLivro(livro);
+        loan.setDataEmprestimo(LocalDate.now());
+        loan.setDataDevolucaoPrevista(loan.getDataEmprestimo().plusDays(usuario.getLimiteEmprestimo()));
 
         livro.setStatus(Status.EMPRESTADO);
-        bookDao.updateBook(livro);
+        bookDao.updateBook(livro, session);
 
-        loanDao.saveLoan(emprestimo);
+        loanDao.saveLoan(loan, session);
     }
     
-    public void finalizarEmprestimo(Loan emprestimo) {
-        emprestimo.setDataDevolucaoReal(LocalDate.now());
+    public void finalizarloan(Loan loan, Session session) {
+        loan.setDataDevolucaoReal(LocalDate.now());
         
-        Reservation proxima = resDao.findNextInLine(emprestimo.getLivro());
+        Reservation proxima = resDao.findNextInLine(loan.getLivro(), session);
         
         if (proxima != null) {
-        	emprestimo.getLivro().setStatus(Status.RESERVADO); 
+        	loan.getLivro().setStatus(Status.RESERVADO); 
             System.out.println("--- NOTIFICAÇÃO ---");
             System.out.println("O livro ficou disponível, mas há uma RESERVA ativa!");
             System.out.println("Favor avisar: " + proxima.getUser().getNome());
         } else {
-        	emprestimo.getLivro().setStatus(Status.DISPONIVEL);
+        	loan.getLivro().setStatus(Status.DISPONIVEL);
         }
         
-        bookDao.updateBook(emprestimo.getLivro());
-        loanDao.updateLoan(emprestimo);
+        bookDao.updateBook(loan.getLivro(), session);
+        loanDao.updateLoan(loan, session);
     }
     
-    public void atualizarEmprestimo(Loan emprestimo) {
-        if(emprestimo.getDataDevolucaoReal() == null) {
-        	emprestimo.setDataDevolucaoPrevista(LocalDate.now().plusDays(emprestimo.getUser().getLimiteEmprestimo()));
-            loanDao.updateLoan(emprestimo);
+    public void atualizarloan(Loan loan, Session session) {
+        if(loan.getDataDevolucaoReal() == null) {
+        	loan.setDataDevolucaoPrevista(LocalDate.now().plusDays(loan.getUser().getLimiteEmprestimo()));
+            loanDao.updateLoan(loan, session);
         } else {
         	System.out.println("Este empréstimo foi finalizado, não é possível alterar! Solicite um novo.");
             return;
         }
     }
 
-	public void listLoanPerUser(int userID) {
-		User user = userDao.findById(userID);
-		List<Loan> result = loanDao.findLoanPerUser(user);
+	public void listLoanPerUser(Session session) {
+		System.out.println("ID do usuário para visualizar seu empréstimos ativos: ");
+		int userID = scanner.nextInt();
+		User user = userDao.findById(userID, session);
+		List<Loan> result = loanDao.findLoanPerUser(user, session);
 		if(result.isEmpty() || result == null) {
 			System.out.println("Não foi encontrado empréstimos ativos para este usuário!");
 		} else {
@@ -90,8 +96,8 @@ public class LoanService {
 		}
 	}
 
-	public void findLoanLated() {
-		List<Loan> result = loanDao.findLoanLated();
+	public void findLoanLated(Session session) {
+		List<Loan> result = loanDao.findLoanLated(session);
 		if(result.isEmpty() || result == null) {
 			System.out.println("Não há empréstimos atrasados!");
 		} else {
@@ -115,5 +121,40 @@ public class LoanService {
 			                           " | Atraso: " + diasAtrasados + " dias (" + situacao + ")");
 			  }
 		}
+	}
+
+	public void createLoan(Session session) {
+		System.out.print("ID do Usuário: "); 
+        int uId = scanner.nextInt();
+        System.out.print("ID do Livro: "); 
+        int bId = scanner.nextInt();
+        
+        User user = userDao.findById(uId, session);
+        Book book = bookDao.findById(bId, session);
+        
+        registrarEmprestimo(user, book, session);
+	}
+
+	public void finishLoan(Session session) {
+		System.out.print("ID do Empréstimo a finalizar: ");
+        int loanId = scanner.nextInt();
+        
+        Loan loan = loanDao.findById(loanId, session);
+        if (loan != null) {
+            finalizarloan(loan, session);
+        } else {
+            System.out.println("Empréstimo não encontrado.");
+        }
+	}
+
+	public void listLoan(Session session) {
+		System.out.print("ID do Usuário: "); 
+    	int uId = scanner.nextInt();
+    	User user = userDao.findById(uId, session);
+    	List<Loan> result = loanDao.allLoanPerUser(user, session);
+    	for(Loan l : result) {
+    		System.out.println(" #" + l.getId() +" - "+ l.getLivro().getTitulo() + 
+                    " | Data: " + l.getDataEmprestimo());
+    	}
 	}
 }

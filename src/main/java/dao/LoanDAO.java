@@ -16,172 +16,79 @@ import entities.User;
 
 public class LoanDAO {
 //	create
-	public void saveLoan(Loan emprestimo) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.persist(emprestimo);
-            tx.commit();
-            System.out.println("Loan saved successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void saveLoan(Loan emprestimo, Session session) {
+		session.persist(emprestimo);
     }
 	
 //	read all
-	public List<Loan> getAllLoans(){
-		try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("from Loan", Loan.class).list();
-        }
+	public List<Loan> getAllLoans(Session session){
+		return session.createQuery("from Loan", Loan.class).list();
 	}
 	
 //	update
-	public void updateLoan(Loan emprestimo) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.merge(emprestimo);
-            tx.commit();
-            System.out.println("Loan updated successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void updateLoan(Loan emprestimo, Session session) {
+		session.merge(emprestimo);
     }
 	
-	public Loan findById(int id) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-        	tx = session.beginTransaction();
-            Loan loan = session.get(Loan.class, id);
-            if (loan != null) {
-            	return loan;
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
-        return null;
+	public Loan findById(int id, Session session) {
+		Loan loan = session.get(Loan.class, id);
+		return loan;
     }
 	
 //	delete
-	public void deleteLoan(Loan emprestimo) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.remove(emprestimo);
-            tx.commit();
-            System.out.println("Loan deleted successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void deleteLoan(Loan emprestimo, Session session) {
+		session.remove(emprestimo);
     }
 	
 //	count how many loans actives a user have
-	public int countLoanPerUser(User user) {
-		Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            String hql = "SELECT COUNT(l) FROM Loan l WHERE l.user = :user AND l.dataDevolucaoReal IS NULL";
-            
-            Long count = session.createQuery(hql, Long.class)
-                                .setParameter("user", user)
-                                .uniqueResult();
-            tx.commit();
-            return count != null ? count.intValue() : 0;
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-            return 0;
-        }
+	public int countLoanPerUser(User user, Session session) {
+		String hql = "SELECT COUNT(l) FROM Loan l WHERE l.user = :user AND l.dataDevolucaoReal IS NULL";
+        
+        Long count = session.createQuery(hql, Long.class)
+                            .setParameter("user", user)
+                            .uniqueResult();
+        return count != null ? count.intValue() : 0;
 	}
 	
 //	all loans per user
-	public List<Loan> allLoanPerUser(User user) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            String hql = "FROM Loan l WHERE l.user = :user ";
-            
-            List<Loan> list = session.createQuery(hql, Loan.class)
-                                .setParameter("user", user)
-                                .list();
+	public List<Loan> allLoanPerUser(User user, Session session) {
+		String hql = "FROM Loan l WHERE l.user = :user ";
+        
+        List<Loan> loanList = session.createQuery(hql, Loan.class)
+                            .setParameter("user", user)
+                            .list();
 
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getStackTrace();
-            return null;
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+        return loanList;
 	}
 
-	public List<Loan> findLoanPerUser(User user) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            String hql = "FROM Loan l WHERE l.user = :user AND l.dataDevolucaoReal IS NULL";
-            
-            List<Loan> list = session.createQuery(hql, Loan.class)
-                                .setParameter("user", user)
-                                .list();
+	public List<Loan> findLoanPerUser(User user, Session session) {
+		String hql = "FROM Loan l WHERE l.user = :user AND l.dataDevolucaoReal IS NULL";
+        
+        List<Loan> loanList = session.createQuery(hql, Loan.class)
+                            .setParameter("user", user)
+                            .list();
 
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getStackTrace();
-            return null;
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+        return loanList;
 	}
 
-	public List<Loan> findLoanLated() {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-            String hql = "FROM Loan l WHERE l.dataDevolucaoPrevista < l.dataDevolucaoReal OR (l.dataDevolucaoPrevista < :hoje AND l.dataDevolucaoReal IS NULL)";
-            List<Loan> list = session.createQuery(hql, Loan.class)
-            					.setParameter("hoje", LocalDate.now())
-                                .list();
+	public List<Loan> findLoanLated(Session session) {
+		String hql = "FROM Loan l WHERE l.dataDevolucaoPrevista < l.dataDevolucaoReal OR (l.dataDevolucaoPrevista < :hoje AND l.dataDevolucaoReal IS NULL)";
+        List<Loan> loanList = session.createQuery(hql, Loan.class)
+        					.setParameter("hoje", LocalDate.now())
+                            .list();
 
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getStackTrace();
-            return null;
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+        return loanList;
 	}
 
-	public Loan findLoanBook(Book obj) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
+	public Loan findLoanBook(Book obj, Session session) {
 		Loan loan = new Loan();
-        try {
-        	String sql = "SELECT * FROM loans l "
-        			   + "WHERE l.book_id = :id AND dataDevolucaoReal IS NULL";
-	        
-        	loan = session.createNativeQuery(sql, Loan.class)
-                    .setParameter("id", obj.getId())
-                    .uniqueResult(); 
-
-        	return loan;
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getStackTrace();
-            return null;
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+		String sql = "SELECT * FROM loans l "
+ 			   + "WHERE l.book_id = :id AND dataDevolucaoReal IS NULL";
+     
+	 	loan = session.createNativeQuery(sql, Loan.class)
+	             .setParameter("id", obj.getId())
+	             .uniqueResult(); 
+	
+	 	return loan;
 	}
 }

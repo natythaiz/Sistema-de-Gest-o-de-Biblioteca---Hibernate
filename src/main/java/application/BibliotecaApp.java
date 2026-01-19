@@ -1,6 +1,9 @@
 package application;
 
 import java.util.Scanner;
+
+import org.hibernate.Session;
+
 import services.*;
 import entities.*;
 import entities.enumeradores.*;
@@ -77,115 +80,256 @@ public class BibliotecaApp {
         System.out.println("0 - Sair");
         System.out.print("Escolha uma opção: ");
     }
-
-    // --- MÉTODOS DE AÇÃO ---
-
+	
     private static void cadastrarLivro() {
-        System.out.print("Título: "); String titulo = scanner.nextLine();
-        System.out.print("Autor: "); String autor = scanner.nextLine();
-        System.out.print("ISBN: "); int isbn = scanner.nextInt();
-        
-        Book novo = new Book(titulo, autor, isbn, Categoria.FICCAO);
-        novo.setStatus(Status.DISPONIVEL);
-        bookService.cadastrarLivro(novo);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            bookService.cadastrarLivro(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     private static void cadastrarUsuario() {
-        System.out.print("Nome: "); String nome = scanner.nextLine();
-        System.out.print("Email: "); String email = scanner.nextLine();
-        
-        User user = new User(nome, email, TipoUser.PROFESSOR);
-        userDao.saveUser(user); 
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            userService.cadastrarUsuario(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     private static void realizarEmprestimo() {
-        System.out.print("ID do Usuário: "); int uId = scanner.nextInt();
-        System.out.print("ID do Livro: "); int bId = scanner.nextInt();
-        
-        User u = userDao.findById(uId);
-        Book b = bookDao.findById(bId);
-        
-        loanService.registrarEmprestimo(u, b);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            loanService.createLoan(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     private static void devolverLivro() {
-        System.out.print("ID do Empréstimo a finalizar: ");
-        int loanId = scanner.nextInt();
-        
-        Loan loan = loanDao.findById(loanId);
-        if (loan != null) {
-            loanService.finalizarEmprestimo(loan);
-        } else {
-            System.out.println("Empréstimo não encontrado.");
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            loanService.finishLoan(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
     }
 
     private static void reservarLivro() {
-        System.out.print("ID do Usuário: "); int uId = scanner.nextInt();
-        System.out.print("ID do Livro: "); int bId = scanner.nextInt();
-        
-        User u = userDao.findById(uId);
-        Book b = bookDao.findById(bId);
-        
-        resService.createReservation(u, b);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            resService.createReservation(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     private static void confirmarReserva() {
-        System.out.print("ID da Reserva a confirmar: ");
-        int resId = scanner.nextInt();
-        resService.confirmReservation(resId);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            resService.confirmReservation(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
     }
 
     private static void listarLivros() {
-        List<Book> livros = bookDao.getAllBooks();
-        System.out.println("\n--- LISTA DE LIVROS ---");
-        for (Book b : livros) {
-            System.out.println("ID: " + b.getId() + " | Título: " + b.getTitulo() + " | Status: " + b.getStatus());
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            bookService.listBook(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
         }
     }
     
     private static void listarEmprestimos() {
-    	System.out.print("ID do Usuário: "); 
-    	int uId = scanner.nextInt();
-    	User user = userDao.findById(uId);
-    	List<Loan> result = loanDao.allLoanPerUser(user);
-    	for(Loan l : result) {
-    		System.out.println(" #" + l.getId() +" - "+ l.getLivro().getTitulo() + 
-                    " | Data: " + l.getDataEmprestimo());
-    	}
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            loanService.listLoan(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
     
     private static void listaReservaLivro() {
-		System.out.println("ID do livro a pesquisar: ");
-		int livroID = scanner.nextInt();
-		resService.listReservationBook(livroID);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            resService.listReservationBook(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
     
     private static void emprestimosAtivosUser() {
-    	System.out.println("ID do usuário para visualizar seu empréstimos ativos: ");
-		int userID = scanner.nextInt();
-		loanService.listLoanPerUser(userID);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            loanService.listLoanPerUser(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
 
     private static void buscaLivroString() {
-		System.out.println("Digite o fragmento de palavra que deseja pesquisar: ");
-		String string = scanner.nextLine();
-		bookService.findBookString(string);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            bookService.findBookString(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
     
     private static void emprestimoAtrasado() {
-		loanService.findLoanLated();
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            loanService.findLoanLated(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
     
     private static void buscaLivroCategoria() {
-		System.out.println("Qual categoria deseja buscar: ");
-		String categoria = scanner.nextLine();
-		bookService.findBookCategory(categoria);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            bookService.findBookCategory(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
     
     private static void buscaUserTipo() {
-    	System.out.println("Qual tipo de usuário deseja buscar: ");
-		String tipo = scanner.nextLine();
-		userService.findUserType(tipo);
+    	Session session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            userService.findUserType(session);
+            
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
 	}
 }

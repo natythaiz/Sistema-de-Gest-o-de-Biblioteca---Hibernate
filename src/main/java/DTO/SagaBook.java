@@ -47,4 +47,17 @@ public class SagaBook {
 	public void setSagaNome(String sagaNome) {
 		this.sagaNome = sagaNome;
 	}
+
+	@Override
+	public String toString() {
+		String str = "";
+		if(sagaNome == null) {
+			str = ", sem saga cadastrada!";
+		} else {
+			str = ", saga: " + sagaNome + ".";
+		}
+		return "Book id #" + id + ", " + titulo + ", (" + autor + ")" + str;
+	}
+	
+	
 }

@@ -1,9 +1,13 @@
 package services;
 
 import java.util.List;
+import java.util.Scanner;
+
+import org.hibernate.Session;
 
 import dao.BookDAO;
 import dao.ReservationDAO;
+import dao.UserDAO;
 import entities.Book;
 import entities.Reservation;
 import entities.User;
@@ -13,30 +17,38 @@ import entities.enumeradores.StatusReservation;
 public class ReservationService {
     private ReservationDAO resDao = new ReservationDAO();
     private BookDAO bookDao = new BookDAO();
+    private UserDAO userDao = new UserDAO();
+    private Scanner scanner = new Scanner(System.in);
 
-    public void createReservation(User user, Book book) {
+    public void createReservation(Session session) {
+    	System.out.print("ID do Usuário: "); 
+    	int uId = scanner.nextInt();
+        System.out.print("ID do Livro: "); 
+        int bId = scanner.nextInt();
+        
+        User user = userDao.findById(uId, session);
+        Book book = bookDao.findById(bId, session);
         if (book.getStatus() == Status.DISPONIVEL) {
             throw new RuntimeException("Livro está disponível. Faça o empréstimo direto!");
         }
 
-        // O usuário já está na fila desse livro? (Evita duplicidade)
-        // método no DAO para checar isso
-
         Reservation res = new Reservation(book, user);
-        resDao.save(res); 
+        resDao.save(res, session); 
         System.out.println("Reserva confirmada para " + user.getNome() + " na fila de " + book.getTitulo());
     }
 
-    public void cancelReservation(int resId) {
-        Reservation res = resDao.findById(resId);
+    public void cancelReservation(int resId, Session session) {
+        Reservation res = resDao.findById(resId, session);
         if (res != null) {
             res.setStatus(StatusReservation.CANCELED);
-            resDao.update(res);
+            resDao.update(res, session);
         }
     }
     
-    public void confirmReservation(int resId) {
-        Reservation res = resDao.findById(resId);
+    public void confirmReservation(Session session) {
+    	System.out.print("ID da Reserva a confirmar: ");
+        int resId = scanner.nextInt();
+        Reservation res = resDao.findById(resId, session);
         
         if (res == null) {
             throw new RuntimeException("Reserva não encontrada!");
@@ -52,10 +64,10 @@ public class ReservationService {
             LoanService loanService = new LoanService();
             livro.setStatus(Status.DISPONIVEL);
             
-            loanService.registrarEmprestimo(usuario, livro);
+            loanService.registrarEmprestimo(usuario, livro, session);
 
             res.setStatus(StatusReservation.COMPLETED);
-            resDao.update(res);
+            resDao.update(res, session);
             
             System.out.println("Reserva convertida em empréstimo com sucesso!");
 
@@ -64,13 +76,15 @@ public class ReservationService {
         }
     }
 
-	public void listReservationBook(int livroID) {
-		Book book = bookDao.findById(livroID);
+	public void listReservationBook(Session session) {
+		System.out.println("ID do livro a pesquisar: ");
+		int livroID = scanner.nextInt();
+		Book book = bookDao.findById(livroID, session);
 		if(book == null) {
 			System.out.println("Não foi encontrado um livro com este ID!");
 			return;
 		}
-		List<Reservation> result = resDao.usersReservatitionByBook(book);
+		List<Reservation> result = resDao.usersReservatitionByBook(book, session);
     	if(result.isEmpty() || result == null) {
     		System.out.println("Lista de retorno vazia, não há empréstimos deste livro!");
     	} else {

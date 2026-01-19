@@ -1,13 +1,14 @@
 package services;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import org.hibernate.Session;
 
 import DTO.SagaDisponibilidade;
 import dao.BookDAO;
@@ -26,40 +27,45 @@ public class SagaService {
 	private ReservationDAO reservationDAO = new ReservationDAO();
 	private LoanDAO loanDAO = new LoanDAO();
 	private Scanner scanner = new Scanner(System.in);
-	DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-	public void cadastrar() {
-		scanner.nextInt();
+	public void create(Session session) {
+		scanner.nextLine();
 		System.out.print("Nome da saga: "); 
-		String nome = scanner.nextLine();
-		Saga saga = new Saga(nome);
-		if (saga.getNome() == null) {
-            throw new RuntimeException("O nome da saga é obrigatório.");
-        }
-		sagaDao.save(saga);
+		String name = scanner.nextLine();
+		if(name.isEmpty() || name == null) {
+			System.out.println("O nome da saga é um campo obrigatório!");
+		} else {
+			Saga saga = new Saga(name);
+			if (saga.getNome() == null) {
+	            throw new RuntimeException("O nome da saga é obrigatório.");
+	        }
+			sagaDao.save(saga, session);
+		}
 		return;
 	}
 
-	public void atualizarLivroSaga(int id) {
-		Book book = bookDao.findById(id);
+	public void updateBookFromSaga(Session session) {
+		System.out.print("ID do livro para atualização: "); 
+		int id = scanner.nextInt();
+		Book book = bookDao.findById(id, session);
 		if (book != null) {
            System.out.println("Digite o nome da saga que deseja adicionar ao livro " + book.getTitulo());
            String nomeSaga = scanner.nextLine();
-           Saga saga = sagaDao.buscarSagaNome(nomeSaga);
+           Saga saga = sagaDao.findySagaByName(nomeSaga, session);
            if(saga == null) {
         	   saga = new Saga(nomeSaga);
-        	   sagaDao.save(saga);
+        	   sagaDao.save(saga, session);
            }
            book.setSaga(saga);
-           bookDao.updateBook(book);
+           bookDao.updateBook(book, session);
            System.out.println("Saga " + saga.getNome() + " adicionada ao livro " + book.getTitulo());
         } else {
             System.out.println("Livro não encontrado.");
         }
 	}
 
-	public void listarSaga() {
-		List<Saga> sagas = sagaDao.getAll();
+	public void listSaga(Session session) {
+		List<Saga> sagas = sagaDao.getAll(session);
 		if(sagas != null) {
 			System.out.println("Total de sagas encontradas: " + sagas.size());
 		    for (Saga obj : sagas) {
@@ -70,16 +76,16 @@ public class SagaService {
 		}
 	}
 
-	public void listarLivroSaga() {
+	public void listBookSaga(Session session) {
 		scanner.nextLine();
 		System.out.println("Digite o nome da saga:");
 		String nomeSaga = scanner.nextLine();
-		Saga saga = sagaDao.buscarSagaNome(nomeSaga);
+		Saga saga = sagaDao.findySagaByName(nomeSaga, session);
 		if(saga == null) {
      	   System.out.println("Saga não encontrada no banco de dados, digite corretamente o nome (use a lista como parâmetro)!");
      	   return;
         }
-        List<Book> results = bookDao.findBookSaga(saga);
+        List<Book> results = bookDao.findBookSaga(saga, session);
         if(results.isEmpty()) {
         	System.out.println("A saga '" + saga.getNome() + "' não possui livros cadastrados!");
         } else {
@@ -90,11 +96,11 @@ public class SagaService {
         }
 	}
 	
-	public List<Long> pegarVariasSagas() {
+	public List<Long> getManySaga(Session session) {
 		System.out.println("Selecione o id das sagas que deseja pesquisar, e 0 para finalizar a busca: ");
 		List<Long> sagasId = new ArrayList<Long>();
 		Long opc = (long) -1;
-		List<Saga> sagas = sagaDao.getAll();
+		List<Saga> sagas = sagaDao.getAll(session);
 		if(sagas != null) {
 			System.out.println("Sagas disponíveis: ");
 		    for (Saga obj : sagas) {
@@ -114,8 +120,9 @@ public class SagaService {
 		return sagasId;
 	}
 
-	public void listarLivroVariasSagas() {
-		List<Book> book = bookDao.findBooksManySagas(pegarVariasSagas());
+	public void listBookFromSaga(Session session) {
+		List<Long> sagaList = getManySaga(session);
+		List<Book> book = bookDao.findBooksManySagas(sagaList, session);
 	    if(book.isEmpty()) {
 	    	System.out.println("Não encontramos livros das sagas selecionadas!");
 	    } else {
@@ -126,65 +133,63 @@ public class SagaService {
 	    }
 	}
 
-	public void listarSagasContLivros() {
-			Map<String, Long> resultado = new HashMap<>();
-			resultado = sagaDao.countBookSaga();
-			for (String nome : resultado.keySet()) {
-			    Long total = resultado.get(nome);
+	public void countBookFromSaga(Session session) {
+			Map<String, Long> sagaCountList = new HashMap<>();
+			sagaCountList = sagaDao.countBookSaga(session);
+			for (String nome : sagaCountList.keySet()) {
+			    Long total = sagaCountList.get(nome);
 			    
 			    System.out.println(nome + ": " + total + " livros");
 			}
 	}
 
-	public void dataEmprestimoPossivelSagas() {
-		List<Saga> sagas = sagaDao.findSagasById(pegarVariasSagas());
-		if(sagas.isEmpty()) {
-			System.out.println("Você selecionou uma saga que não existe!");
+	public void listDateAvaliableLoan(Session session) {
+		List<Long> sagaListID = getManySaga(session);
+		List<Saga> sagaList = sagaDao.findSagasById(sagaListID, session);
+		if(sagaList.isEmpty()) {
+			System.out.println("Sem resultados de busca das sagas selecionadas!");
 		} else {
-			List<SagaDisponibilidade> valores = new ArrayList<>();
+			List<SagaDisponibilidade> sagaDisponibilidadeList = new ArrayList<>();
 			String str = "";
-			for(int i=0; i<sagas.size(); i++) {
-				List<Book> results = bookDao.findBookSaga(sagas.get(i));
-				if(results.isEmpty()) {
-					str += "Não há livros cadastrados nesta saga! (" + sagas.get(i).getNome() + ")";
+			for(int i=0; i<sagaList.size(); i++) {
+				List<Book> bookList = bookDao.findBookSaga(sagaList.get(i), session);
+				if(bookList.isEmpty()) {
+					str += "Não há livros cadastrados nesta saga! (" + sagaList.get(i).getNome() + ") \n";
 					continue;
 				}
-		        List<LocalDate> data = findDate(results);
-		        LocalDate dataMaxima = Collections.max(data);
-		        SagaDisponibilidade novo = new SagaDisponibilidade(sagas.get(i).getNome(), dataMaxima);
-		        valores.add(novo);
+		        List<LocalDate> dataList = findDate(bookList, session);
+		        LocalDate dateMax = Collections.max(dataList);
+		        SagaDisponibilidade sagaDisponibilidade = new SagaDisponibilidade(sagaList.get(i).getNome(), dateMax);
+		        sagaDisponibilidadeList.add(sagaDisponibilidade);
 			}
-			System.out.println(str);
-			for(SagaDisponibilidade obj: valores) {
+			System.out.print(str);
+			for(SagaDisponibilidade obj: sagaDisponibilidadeList) {
 				System.out.println(obj);
 			}
 		}
 	}
 
-	private List<LocalDate> findDate(List<Book> results) {
-		List<LocalDate> data = new ArrayList<LocalDate>();
-		for(Book obj: results) {
+	private List<LocalDate> findDate(List<Book> bookList, Session session) {
+		List<LocalDate> dateList = new ArrayList<>();
+		for(Book obj: bookList) {
 			if(obj.getStatus() == Status.DISPONIVEL) {
-				data.add(LocalDate.now());
+				dateList.add(LocalDate.now());
 			} else {
-				List<Reservation> reservas = reservationDAO.isReservation(obj);
-				Loan loan = loanDAO.findLoanBook(obj);
-				LocalDate devolucao = loan.getDataDevolucaoPrevista();
+				List<Reservation> reservationList = reservationDAO.bookReservationList(obj, session);
+				Loan loan = loanDAO.findLoanBook(obj, session);
+				LocalDate dateReturn = loan.getDataDevolucaoPrevista();
 				
-//				1° opção: está emprestado e não está na lista de reserva
-				if(reservas.isEmpty()) {
-					data.add(devolucao);
+				if(reservationList.isEmpty()) {
+					dateList.add(dateReturn);
 				} else {
-//					2° opcação está emprestado e está na lista de reserva 
-//					ai tem que ser feito uma interação dos valores baseado no tipo de usuário
-					for(int i=0; i<reservas.size(); i++) {
-						int dia = reservas.get(i).getUser().getTipo().getPrazoEmprestimo();
-						devolucao = devolucao.plusDays(dia);
+					for(int i=0; i<reservationList.size(); i++) {
+						int time = reservationList.get(i).getUser().getTipo().getPrazoEmprestimo();
+						dateReturn = dateReturn.plusDays(time);
 					}
-					data.add(devolucao);
+					dateList.add(dateReturn);
 				}
 			}
 		}
-		return data;
+		return dateList;
 	}
 }

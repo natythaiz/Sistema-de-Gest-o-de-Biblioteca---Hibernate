@@ -11,17 +11,8 @@ import entities.enumeradores.TipoUser;
 
 public class UserDAO {
 //	create
-	public void saveUser(User user) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.persist(user);
-            tx.commit();
-            System.out.println("User saved successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void saveUser(User user, Session session) {
+		session.persist(user);
     }
 	
 //	read all
@@ -32,71 +23,28 @@ public class UserDAO {
 	}
 	
 //	update
-	public void updateUser(User user) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.merge(user);
-            tx.commit();
-            System.out.println("User updated successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void updateUser(User user, Session session) {
+		session.merge(user);
     }
 	
-	public User findById(int id) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-        	tx = session.beginTransaction();
-            User user = session.get(User.class, id);
-            if (user != null) {
-            	return user;
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
-        return null;
+	public User findById(int id, Session session) {
+		User user = session.get(User.class, id);
+		return user;
     }
 	
 //	delete
-	public void deleteUser(User user) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.remove(user);
-            tx.commit();
-            System.out.println("User deleted successfully.");
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
+	public void deleteUser(User user, Session session) {
+		session.remove(user);
     }
 
-	public List<User> findUserType(String upperCase) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-        try {
-        	TipoUser tipoEnum = TipoUser.valueOf(upperCase);
-            String hql = "FROM User u WHERE u.tipo = :string";
-            
-            List<User> list = session.createQuery(hql, User.class)
-                                .setParameter("string", tipoEnum)
-                                .list();
+	public List<User> findUserType(String upperCase, Session session) {
+		TipoUser tipoEnum = TipoUser.valueOf(upperCase);
+        String hql = "FROM User u WHERE u.tipo = :string";
+        
+        List<User> list = session.createQuery(hql, User.class)
+                            .setParameter("string", tipoEnum)
+                            .list();
 
-            return list;
-        } catch (IllegalArgumentException e) {
-            System.out.println("Não existe este tipo de usuário!");
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            e.getStackTrace();
-            return null;
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
+        return list;
 	}
 }
